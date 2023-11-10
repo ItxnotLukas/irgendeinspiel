@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modernes Zahlenraten-Spiel</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #3498db; /* Blue background color */
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #3498db;
+            font-size: 36px;
+            margin-top: 20px;
+        }
+
+        #game-container {
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #444;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 400px;
+            position: relative; /* Add this to position the texture overlay */
+        }
+
+        #message {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+
+        #user-input {
+            width: 70px;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        #guess-button {
+            background-color: #3498db;
+            color: #ffffff;
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #guess-button:hover {
+            background-color: #2980b9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #e74c3c;
+            color: #ffffff;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .language-button {
+            margin-top: 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            font-size: 16px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .language-button:hover {
+            background-color: #2980b9;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        #message.fade-in {
+            animation: fadeIn 1s;
+        }
+
+        /* Advanced Animations and Textures */
+        #game-container {
+            background-image: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        #guess-button {
+            background-image: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        #guess-button:hover {
+            background-image: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+        }
+
+        /* Texture Overlay */
+        #game-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(''); /* Replace with your own texture image URL */
+            opacity: 0.1; /* Adjust the opacity to your liking */
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Guess The Number</h1>
+    <div id="game-container">
+        <p id="message">Rate eine Zahl zwischen 1 und 100:</p>
+        <input type="number" id="user-input" min="1" max="100">
+        <button id="guess-button">Rate</button>
+        <p id="badge" class="badge">Gewonnen: 0 mal</p>
+        <button id="language-button" class="language-button">Sprache ändern</button>
+    </div>
+
+    <script>
+        let targetNumber = generateRandomNumber();
+        let attempts = 0;
+        let badgeCount = 0;
+        let language = 'de'; // Default language is German
+
+        const message = document.getElementById("message");
+        const userInput = document.getElementById("user-input");
+        const guessButton = document.getElementById("guess-button");
+        const badge = document.getElementById("badge");
+        const languageButton = document.getElementById("language-button");
+
+        function generateRandomNumber() {
+            return Math.floor(Math.random() * 100) + 1;
+        }
+
+        function setLanguageText() {
+            switch (language) {
+                case 'de':
+                    message.textContent = "Rate eine Zahl zwischen 1 und 100:";
+                    guessButton.textContent = "Rate";
+                    badge.textContent = `Gewonnen: ${badgeCount} mal`;
+                    languageButton.textContent = "Sprache ändern";
+                    break;
+                case 'en':
+                    message.textContent = "Guess a number between 1 and 100:";
+                    guessButton.textContent = "Guess";
+                    badge.textContent = `Won: ${badgeCount} times`;
+                    languageButton.textContent = "Change Language";
+                    break;
+                case 'es':
+                    message.textContent = "Adivina un número entre 1 y 100:";
+                    guessButton.textContent = "Adivinar";
+                    badge.textContent = `Ganado: ${badgeCount} veces`;
+                    languageButton.textContent = "Cambiar Idioma";
+                    break;
+                case 'ru':
+                    message.textContent = "Угадай число от 1 до 100:";
+                    guessButton.textContent = "Угадать";
+                    badge.textContent = `Выиграно: ${badgeCount} раз`;
+                    languageButton.textContent = "Изменить язык";
+                    break;
+                case 'zh':
+                    message.textContent = "猜一个1到100之间的数字：";
+                    guessButton.textContent = "猜一猜";
+                    badge.textContent = `赢得次数：${badgeCount} 次`;
+                    languageButton.textContent = "切换语言";
+                    break;
+            }
+        }
+
+        setLanguageText(); // Set initial language text
+
+        guessButton.addEventListener("click", () => {
+            const userGuess = parseInt(userInput.value);
+
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                message.textContent = `Bitte gib eine gültige Zahl zwischen 1 und 100 ein.`;
+                return;
+            }
+
+            attempts++;
+
+            if (userGuess === targetNumber) {
+                message.textContent = `Herzlichen Glückwunsch! Du hast die Zahl ${targetNumber} in ${attempts} Versuchen erraten.`;
+                badgeCount++;
+                badge.textContent = `Gewonnen: ${badgeCount} mal`;
+                targetNumber = generateRandomNumber(); // Generate a new random number
+                attempts = 0; // Reset attempts
+            } else if (userGuess < targetNumber) {
+                switch (language) {
+                    case 'de':
+                        message.textContent = "Versuche eine höhere Zahl.";
+                        break;
+                    case 'en':
+                        message.textContent = "Try a higher number.";
+                        break;
+                    case 'es':
+                        message.textContent = "Intenta con un número más alto.";
+                        break;
+                    case 'ru':
+                        message.textContent = "Попробуйте число побольше.";
+                        break;
+                    case 'zh':
+                        message.textContent = "尝试更高的数字。";
+                        break;
+                }
+            } else {
+                switch (language) {
+                    case 'de':
+                        message.textContent = "Versuche eine niedrigere Zahl.";
+                        break;
+                    case 'en':
+                        message.textContent = "Try a lower number.";
+                        break;
+                    case 'es':
+                        message.textContent = "Intenta con un número más bajo.";
+                        break;
+                    case 'ru':
+                        message.textContent = "Попробуйте число поменьше.";
+                        break;
+                    case 'zh':
+                        message.textContent = "尝试更低的数字。";
+                        break;
+                }
+            }
+
+            // Füge eine Einblenden-Animation zur Nachricht hinzu
+            message.classList.add("fade-in");
+        });
+
+        languageButton.addEventListener("click", () => {
+            // Toggle between languages
+            switch (language) {
+                case 'de':
+                    language = 'en';
+                    break;
+                case 'en':
+                    language = 'es';
+                    break;
+                case 'es':
+                    language = 'ru';
+                    break;
+                case 'ru':
+                    language = 'zh';
+                    break;
+                case 'zh':
+                    language = 'de';
+                    break;
+            }
+            setLanguageText(); // Update language text
+        });
+    </script>
+</body>
+</html>
